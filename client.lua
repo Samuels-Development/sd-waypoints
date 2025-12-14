@@ -4,7 +4,7 @@ lib.locale(Config.Locale)
 
 local DUI_WIDTH = 512
 local DUI_HEIGHT = 320
-local UPDATE_INTERVAL = 50
+local UPDATE_INTERVAL = 100 -- Reduced frequency for better performance
 local CHECK_INTERVAL = 200
 
 -- Dynamic height settings - marker lowers as you get closer
@@ -42,6 +42,10 @@ local smoothedGroundZ = 0.0
 local targetHeight = MARKER_HEIGHT_MAX
 local targetGroundZ = 0.0
 local lastValidGroundZ = 0.0
+
+-- Cache for DUI updates (avoid sending when unchanged)
+local lastSentDistance = ''
+local lastSentUnit = ''
 
 --- Lerp function for smooth transitions
 ---@param current number Current value
@@ -147,11 +151,18 @@ end
 local function CalculateDistance2D(pos1, pos2)
     local dx = pos1.x - pos2.x
     local dy = pos1.y - pos2.y
-    return math.sqrt(dx * dx + dy * dy)
+    return sqrt(dx * dx + dy * dy)
 end
 
 local METERS_TO_FEET = 3.28084
 local METERS_TO_MILES = 0.000621371
+
+-- Localize frequently used functions for performance
+local floor = math.floor
+local sqrt = math.sqrt
+local max = math.max
+local abs = math.abs
+local format = string.format
 
 --- Formats distance for display
 ---@param distance number Distance in meters
@@ -160,17 +171,18 @@ local METERS_TO_MILES = 0.000621371
 local function FormatDistance(distance)
     if Config.UseMetric then
         if distance >= 1000 then
-            return string.format('%.1f', distance / 1000), 'KM'
+            return format('%.1f', distance * 0.001), 'KM'
         else
-            return string.format('%d', math.floor(math.max(0, distance))), 'M'
+            local m = floor(distance)
+            return tostring(m > 0 and m or 0), 'M'
         end
     else
         local feet = distance * METERS_TO_FEET
         if feet >= 5280 then
-            local miles = distance * METERS_TO_MILES
-            return string.format('%.1f', miles), 'MI'
+            return format('%.1f', distance * METERS_TO_MILES), 'MI'
         else
-            return string.format('%d', math.floor(math.max(0, feet))), 'FT'
+            local ft = floor(feet)
+            return tostring(ft > 0 and ft or 0), 'FT'
         end
     end
 end
@@ -181,7 +193,7 @@ end
 ---@param waypointGroundZ number Waypoint's ground Z coordinate
 ---@return number height The target height offset for the marker
 local function GetTargetMarkerHeight(distance, playerZ, waypointGroundZ)
-    distance = math.max(0, distance)
+    distance = max(0, distance)
 
     local baseHeight
     if distance >= HEIGHT_FAR_DISTANCE then
@@ -236,7 +248,7 @@ local function DrawWaypointMarker3D(worldX, worldY, groundZ, markerZ)
     if not GetScreenCoordFromWorldCoord(worldX, worldY, markerZ) then return end
 
     -- Calculate distance multiplier for scaling (only compute sqrt when needed)
-    local camDist = math.sqrt(camDistSq)
+    local camDist = sqrt(camDistSq)
     local distanceMultiplier = camDist > 500.0 and (1.0 + (camDist - 500.0) * 0.0001) or 1.0
 
     -- Draw the sprite
@@ -286,6 +298,8 @@ local function StartWaypointThread()
                 isWaypointActive = false
                 waypointBlip = nil
                 waypointCoords = nil
+                lastSentDistance = ''
+                lastSentUnit = ''
                 SendDUIMessage('hide')
             end
 
@@ -297,16 +311,31 @@ end
 --- Thread for updating the distance display
 local function StartDistanceThread()
     CreateThread(function()
+        local playerPed
+        local playerCoords
+        local distValue, distUnit
+
         while true do
             if isWaypointActive and waypointCoords then
-                local playerCoords = GetEntityCoords(PlayerPedId())
-                currentDistance = CalculateDistance2D(playerCoords, waypointCoords)
-                local distValue, distUnit = FormatDistance(currentDistance)
+                playerPed = PlayerPedId()
+                playerCoords = GetEntityCoords(playerPed)
 
-                SendDUIMessage('updateDistance', {
-                    distance = distValue,
-                    unit = distUnit
-                })
+                -- Calculate distance inline to avoid function call overhead
+                local dx = playerCoords.x - waypointCoords.x
+                local dy = playerCoords.y - waypointCoords.y
+                currentDistance = sqrt(dx * dx + dy * dy)
+
+                distValue, distUnit = FormatDistance(currentDistance)
+
+                -- Only send DUI message if values changed
+                if distValue ~= lastSentDistance or distUnit ~= lastSentUnit then
+                    lastSentDistance = distValue
+                    lastSentUnit = distUnit
+                    SendDUIMessage('updateDistance', {
+                        distance = distValue,
+                        unit = distUnit
+                    })
+                end
 
                 targetHeight = GetTargetMarkerHeight(currentDistance, playerCoords.z, targetGroundZ)
             end
@@ -323,7 +352,7 @@ local function StartGroundZUpdateThread()
             if isWaypointActive and waypointCoords then
                 local newGroundZ = GetGroundZAtPosition(waypointCoords.x, waypointCoords.y)
                 if newGroundZ > -50.0 then
-                    if math.abs(newGroundZ - lastValidGroundZ) > 0.5 then
+                    if abs(newGroundZ - lastValidGroundZ) > 0.5 then
                         targetGroundZ = newGroundZ
                         lastValidGroundZ = newGroundZ
                     end
