@@ -1,3 +1,7 @@
+local Config = require 'config'
+
+lib.locale(Config.Locale)
+
 local DUI_WIDTH = 512
 local DUI_HEIGHT = 320
 local UPDATE_INTERVAL = 50
@@ -146,15 +150,28 @@ local function CalculateDistance2D(pos1, pos2)
     return math.sqrt(dx * dx + dy * dy)
 end
 
+local METERS_TO_FEET = 3.28084
+local METERS_TO_MILES = 0.000621371
+
 --- Formats distance for display
 ---@param distance number Distance in meters
 ---@return string value The formatted distance value
----@return string unit The unit (M or KM)
+---@return string unit The unit
 local function FormatDistance(distance)
-    if distance >= 1000 then
-        return string.format('%.1f', distance / 1000), 'KM'
+    if Config.UseMetric then
+        if distance >= 1000 then
+            return string.format('%.1f', distance / 1000), 'KM'
+        else
+            return string.format('%d', math.floor(math.max(0, distance))), 'M'
+        end
     else
-        return string.format('%d', math.floor(math.max(0, distance))), 'M'
+        local feet = distance * METERS_TO_FEET
+        if feet >= 5280 then
+            local miles = distance * METERS_TO_MILES
+            return string.format('%.1f', miles), 'MI'
+        else
+            return string.format('%d', math.floor(math.max(0, feet))), 'FT'
+        end
     end
 end
 
@@ -197,64 +214,43 @@ local function GetTargetMarkerHeight(distance, playerZ, waypointGroundZ)
     return baseHeight + distanceBonus + elevationBonus
 end
 
---- Draws the waypoint marker in 3D space with fixed screen size
+-- Pre-computed squared max distance for early exit check
+local MAX_DRAW_DISTANCE_SQ = MAX_DRAW_DISTANCE * MAX_DRAW_DISTANCE
+
+--- Draws the waypoint marker and vertical line in 3D space
 ---@param worldX number World X coordinate
 ---@param worldY number World Y coordinate
----@param worldZ number World Z coordinate
----@return number distanceMultiplier The distance multiplier used for scaling
-local function DrawWaypointMarker3D(worldX, worldY, worldZ)
-    if not duiTexture then return 1.0 end
+---@param groundZ number Ground Z coordinate
+---@param markerZ number Marker Z coordinate (ground + height offset)
+local function DrawWaypointMarker3D(worldX, worldY, groundZ, markerZ)
+    if not duiTexture then return end
 
     local camCoords = GetGameplayCamCoord()
-    local distance = #(camCoords - vector3(worldX, worldY, worldZ))
+    local dx, dy, dz = worldX - camCoords.x, worldY - camCoords.y, markerZ - camCoords.z
+    local camDistSq = dx * dx + dy * dy + dz * dz
 
-    if distance > MAX_DRAW_DISTANCE then return 1.0 end
+    -- Early exit if too far (compare squared distances to avoid sqrt)
+    if camDistSq > MAX_DRAW_DISTANCE_SQ then return end
 
-    local onScreen = GetScreenCoordFromWorldCoord(worldX, worldY, worldZ)
-    if not onScreen then return 1.0 end
+    -- Check if on screen before doing more work
+    if not GetScreenCoordFromWorldCoord(worldX, worldY, markerZ) then return end
 
-    local distanceMultiplier = 1.0
-    if distance > 500.0 then
-        distanceMultiplier = 1.0 + ((distance - 500.0) / 5000.0) * 0.5
-    end
+    -- Calculate distance multiplier for scaling (only compute sqrt when needed)
+    local camDist = math.sqrt(camDistSq)
+    local distanceMultiplier = camDist > 500.0 and (1.0 + (camDist - 500.0) * 0.0001) or 1.0
 
-    local width = FIXED_SCALE_WIDTH * distanceMultiplier
-    local height = FIXED_SCALE_HEIGHT * distanceMultiplier
-
-    SetDrawOrigin(worldX, worldY, worldZ, 0)
-    DrawSprite(txdName, txnName, 0.0, 0.0, width, height, 0.0, 255, 255, 255, 255)
+    -- Draw the sprite
+    SetDrawOrigin(worldX, worldY, markerZ, 0)
+    DrawSprite(txdName, txnName, 0.0, 0.0, FIXED_SCALE_WIDTH * distanceMultiplier, FIXED_SCALE_HEIGHT * distanceMultiplier, 0.0, 255, 255, 255, 255)
     ClearDrawOrigin()
 
-    return distanceMultiplier
-end
-
---- Draws a vertical line from ground to the arrow tip
----@param groundX number
----@param groundY number
----@param groundZ number
----@param markerZ number
-local function DrawVerticalLine(groundX, groundY, groundZ, markerZ)
-    local camCoords = GetGameplayCamCoord()
-    local camDist = #(camCoords - vector3(groundX, groundY, markerZ))
-
-    local distanceMultiplier = 1.0
-    if camDist > 500.0 then
-        distanceMultiplier = 1.0 + ((camDist - 500.0) / 5000.0) * 0.5
-    end
-
+    -- Draw vertical line from ground to arrow tip
     local spriteWorldHeight = FIXED_SCALE_HEIGHT * distanceMultiplier * camDist * 1.2
-
     local arrowTipZ = markerZ - (spriteWorldHeight * 0.18)
-
     if arrowTipZ < groundZ + 0.5 then
         arrowTipZ = groundZ + 0.5
     end
-
-    DrawLine(
-        groundX, groundY, groundZ,
-        groundX, groundY, arrowTipZ,
-        255, 255, 255, 255
-    )
+    DrawLine(worldX, worldY, groundZ, worldX, worldY, arrowTipZ, 255, 255, 255, 255)
 end
 
 --- Main thread for tracking waypoint changes
@@ -340,20 +336,26 @@ end
 
 --- Main render thread for drawing the marker
 local function StartRenderThread()
+    local maxHeightClamped = MARKER_HEIGHT_MAX + 1000.0
+
     CreateThread(function()
         while true do
             if isWaypointActive and waypointCoords then
-                smoothedHeight = Lerp(smoothedHeight, targetHeight, HEIGHT_LERP_SPEED)
+                -- Inline lerp for height
+                smoothedHeight = smoothedHeight + (targetHeight - smoothedHeight) * HEIGHT_LERP_SPEED
 
-                smoothedGroundZ = Lerp(smoothedGroundZ, targetGroundZ, GROUND_Z_LERP_SPEED)
+                -- Inline lerp for ground Z
+                smoothedGroundZ = smoothedGroundZ + (targetGroundZ - smoothedGroundZ) * GROUND_Z_LERP_SPEED
 
-                smoothedHeight = Clamp(smoothedHeight, MARKER_HEIGHT_MIN, MARKER_HEIGHT_MAX + 1000.0)
+                -- Inline clamp
+                if smoothedHeight < MARKER_HEIGHT_MIN then
+                    smoothedHeight = MARKER_HEIGHT_MIN
+                elseif smoothedHeight > maxHeightClamped then
+                    smoothedHeight = maxHeightClamped
+                end
 
-                local markerZ = smoothedGroundZ + smoothedHeight
-
-                DrawWaypointMarker3D(waypointCoords.x, waypointCoords.y, markerZ)
-
-                DrawVerticalLine(waypointCoords.x, waypointCoords.y, smoothedGroundZ, markerZ)
+                -- Draw marker and line
+                DrawWaypointMarker3D(waypointCoords.x, waypointCoords.y, smoothedGroundZ, smoothedGroundZ + smoothedHeight)
 
                 Wait(0)
             else
@@ -367,6 +369,10 @@ end
 local function Initialize()
     CreateWaypointDUI()
     Wait(500)
+    SendDUIMessage('config', {
+        color = Config.Color,
+        label = locale('waypoint')
+    })
     SendDUIMessage('hide')
 
     StartWaypointThread()

@@ -7,6 +7,8 @@ interface DUIMessage {
   data?: {
     distance?: string;
     unit?: string;
+    color?: string;
+    label?: string;
   };
 }
 
@@ -14,6 +16,8 @@ const App: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [distance, setDistance] = useState('0');
   const [unit, setUnit] = useState('M');
+  const [color, setColor] = useState('#FFD700');
+  const [label, setLabel] = useState('WAYPOINT');
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -46,6 +50,14 @@ const App: React.FC = () => {
             setUnit(data.unit);
           }
           break;
+        case 'config':
+          if (data?.color !== undefined) {
+            setColor(data.color);
+          }
+          if (data?.label !== undefined) {
+            setLabel(data.label);
+          }
+          break;
       }
     };
 
@@ -62,6 +74,8 @@ const App: React.FC = () => {
         visible={visible}
         distance={distance}
         unit={unit}
+        color={color}
+        label={label}
       />
     </div>
   );
