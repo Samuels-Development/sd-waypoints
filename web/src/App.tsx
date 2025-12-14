@@ -17,7 +17,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // DUI messages come as JSON strings that need to be parsed
       let message: DUIMessage;
 
       try {
@@ -27,7 +26,7 @@ const App: React.FC = () => {
           message = event.data;
         }
       } catch (e) {
-        return; // Ignore non-JSON messages
+        return;
       }
 
       const { action, data } = message;

@@ -9,7 +9,6 @@ client_scripts {
     'client.lua'
 }
 
--- DUI files (not ui_page - DUI is rendered off-screen as a texture)
 files {
     'web/build/index.html',
     'web/build/assets/*.css',
