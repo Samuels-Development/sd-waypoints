@@ -190,24 +190,20 @@ end
 local function StartDistanceThread()
     CreateThread(function()
         while true do
-            if isWaypointActive and isMarkerVisible then
+            if isWaypointActive then
                 local playerCoords = GetEntityCoords(PlayerPedId())
                 local dx, dy = playerCoords.x - waypointX, playerCoords.y - waypointY
                 currentDistance = sqrt(dx * dx + dy * dy)
+                targetHeight = GetTargetMarkerHeight(currentDistance, playerCoords.z, targetGroundZ)
 
-                local distValue, distUnit = FormatDistance(currentDistance)
-                if distValue ~= lastSentDistance or distUnit ~= lastSentUnit then
-                    lastSentDistance = distValue
-                    lastSentUnit = distUnit
-                    SendDUIMessage('updateDistance', { distance = distValue, unit = distUnit })
+                if isMarkerVisible then
+                    local distValue, distUnit = FormatDistance(currentDistance)
+                    if distValue ~= lastSentDistance or distUnit ~= lastSentUnit then
+                        lastSentDistance = distValue
+                        lastSentUnit = distUnit
+                        SendDUIMessage('updateDistance', { distance = distValue, unit = distUnit })
+                    end
                 end
-
-                targetHeight = GetTargetMarkerHeight(currentDistance, playerCoords.z, targetGroundZ)
-            elseif isWaypointActive then
-                local playerCoords = GetEntityCoords(PlayerPedId())
-                local dx, dy = playerCoords.x - waypointX, playerCoords.y - waypointY
-                currentDistance = sqrt(dx * dx + dy * dy)
-                targetHeight = GetTargetMarkerHeight(currentDistance, playerCoords.z, targetGroundZ)
             end
 
             Wait(UPDATE_INTERVAL)

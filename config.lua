@@ -7,7 +7,7 @@ return {
     -- 'classic' - Large distance display with divider and label
     -- 'modern'  - Clean badge design with colored label bar
     -- 'elegant' - Decorative frame with corner accents and diamond separator
-    Style = 'modern',
+    Style = 'classic',
 
     -- The color of the waypoint marker (hex color code)
     Color = '#22C55E',
