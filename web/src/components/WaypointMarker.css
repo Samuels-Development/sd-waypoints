@@ -1,15 +1,9 @@
-/* =====================================
-   SHARED STYLES
-   ===================================== */
 .waypoint-container {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* =====================================
-   CLASSIC STYLE
-   ===================================== */
 .waypoint-classic .waypoint-content {
   display: flex;
   flex-direction: column;
@@ -88,7 +82,293 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
 }
 
-.waypoint-pointer svg {
+.waypoint-classic .waypoint-pointer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.waypoint-modern {
+  gap: 0;
+}
+
+.waypoint-modern .modern-badge {
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.waypoint-modern .modern-upper {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(15, 15, 15, 0.95) 50%,
+    rgba(0, 0, 0, 0.95) 100%
+  );
+  border: 2px solid;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.waypoint-modern .modern-content {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding: 14px 32px 10px 32px;
+  gap: 6px;
+  position: relative;
+}
+
+.waypoint-modern .modern-distance {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 68px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: -2px;
+  text-shadow:
+    0 0 30px rgba(255, 255, 255, 0.2),
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    -1px -1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.waypoint-modern .modern-unit {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow:
+    1px 1px 0 rgba(0, 0, 0, 0.8),
+    -1px -1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.waypoint-modern .modern-divider {
+  height: 2px;
+  margin: 0 16px;
+  position: relative;
+}
+
+.waypoint-modern .modern-divider-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.waypoint-modern .modern-divider-dots {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 6px;
+}
+
+.waypoint-modern .modern-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+.waypoint-modern .modern-label-container {
+  padding: 10px 32px;
+  text-align: center;
+  position: relative;
+}
+
+.waypoint-modern .modern-label {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.waypoint-modern .modern-pointer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.waypoint-modern .modern-pointer-accent {
+  width: 2px;
+  height: 8px;
+}
+
+.waypoint-modern .modern-pointer {
+  width: 22px;
+  height: 14px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+
+.waypoint-modern .modern-pointer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.waypoint-elegant {
+  gap: 0;
+}
+
+.waypoint-elegant .elegant-frame {
+  position: relative;
+  padding: 4px;
+}
+
+.waypoint-elegant .elegant-corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+}
+
+.waypoint-elegant .elegant-corner-tl {
+  top: 0;
+  left: 0;
+  border-top: 3px solid;
+  border-left: 3px solid;
+}
+
+.waypoint-elegant .elegant-corner-tr {
+  top: 0;
+  right: 0;
+  border-top: 3px solid;
+  border-right: 3px solid;
+}
+
+.waypoint-elegant .elegant-corner-bl {
+  bottom: 0;
+  left: 0;
+  border-bottom: 3px solid;
+  border-left: 3px solid;
+}
+
+.waypoint-elegant .elegant-corner-br {
+  bottom: 0;
+  right: 0;
+  border-bottom: 3px solid;
+  border-right: 3px solid;
+}
+
+.waypoint-elegant .elegant-inner {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(20, 20, 20, 0.9) 100%
+  );
+  padding: 14px 28px 10px 28px;
+  position: relative;
+}
+
+.waypoint-elegant .elegant-glow-top {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  opacity: 0.8;
+}
+
+.waypoint-elegant .elegant-glow-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  opacity: 0.6;
+}
+
+.waypoint-elegant .elegant-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.waypoint-elegant .elegant-distance-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.waypoint-elegant .elegant-distance {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 72px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: -2px;
+  text-shadow:
+    0 0 20px rgba(255, 255, 255, 0.3),
+    2px 2px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000;
+}
+
+.waypoint-elegant .elegant-unit {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow:
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+}
+
+.waypoint-elegant .elegant-separator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 6px 0;
+}
+
+.waypoint-elegant .elegant-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+.waypoint-elegant .elegant-diamond {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  border: 2px solid;
+}
+
+.waypoint-elegant .elegant-label {
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  text-shadow:
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+}
+
+.waypoint-elegant .elegant-pointer {
+  width: 24px;
+  height: 14px;
+  margin-top: 6px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+}
+
+.waypoint-elegant .elegant-pointer svg {
   width: 100%;
   height: 100%;
 }
