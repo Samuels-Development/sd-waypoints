@@ -1,22 +1,28 @@
+/* =====================================
+   SHARED STYLES
+   ===================================== */
 .waypoint-container {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.waypoint-content {
+/* =====================================
+   CLASSIC STYLE
+   ===================================== */
+.waypoint-classic .waypoint-content {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.waypoint-distance {
+.waypoint-classic .waypoint-distance {
   display: flex;
   align-items: baseline;
   line-height: 1;
 }
 
-.distance-value {
+.waypoint-classic .distance-value {
   font-family: 'Segoe UI', 'Arial', sans-serif;
   font-size: 100px;
   font-weight: 700;
@@ -32,7 +38,7 @@
   line-height: 0.9;
 }
 
-.distance-unit {
+.waypoint-classic .distance-unit {
   font-family: 'Segoe UI', 'Arial', sans-serif;
   font-size: 36px;
   font-weight: 700;
@@ -47,7 +53,7 @@
   top: -15px;
 }
 
-.waypoint-divider {
+.waypoint-classic .waypoint-divider {
   width: 80%;
   height: 3px;
   background: linear-gradient(
@@ -60,7 +66,7 @@
   margin: 4px 0;
 }
 
-.waypoint-label {
+.waypoint-classic .waypoint-label {
   font-family: 'Segoe UI', 'Arial', sans-serif;
   font-size: 20px;
   font-weight: 600;
@@ -75,7 +81,7 @@
     0 0 10px rgba(0, 0, 0, 0.9);
 }
 
-.waypoint-pointer {
+.waypoint-classic .waypoint-pointer {
   width: 24px;
   height: 16px;
   margin-top: 4px;

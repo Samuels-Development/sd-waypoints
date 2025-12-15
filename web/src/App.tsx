@@ -9,6 +9,7 @@ interface DUIMessage {
     unit?: string;
     color?: string;
     label?: string;
+    style?: 'classic' | 'modern' | 'elegant';
   };
 }
 
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const [unit, setUnit] = useState('M');
   const [color, setColor] = useState('#FFD700');
   const [label, setLabel] = useState('WAYPOINT');
+  const [style, setStyle] = useState<'classic' | 'modern' | 'elegant'>('classic');
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -57,6 +59,9 @@ const App: React.FC = () => {
           if (data?.label !== undefined) {
             setLabel(data.label);
           }
+          if (data?.style !== undefined) {
+            setStyle(data.style);
+          }
           break;
       }
     };
@@ -76,6 +81,7 @@ const App: React.FC = () => {
         unit={unit}
         color={color}
         label={label}
+        style={style}
       />
     </div>
   );
