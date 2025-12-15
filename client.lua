@@ -47,6 +47,9 @@ local lastValidGroundZ = 0.0
 local lastSentDistance = ''
 local lastSentUnit = ''
 
+-- Visibility tracking (set by render thread)
+local isMarkerVisible = false
+
 --- Lerp function for smooth transitions
 ---@param current number Current value
 ---@param target number Target value
@@ -234,18 +237,19 @@ local MAX_DRAW_DISTANCE_SQ = MAX_DRAW_DISTANCE * MAX_DRAW_DISTANCE
 ---@param worldY number World Y coordinate
 ---@param groundZ number Ground Z coordinate
 ---@param markerZ number Marker Z coordinate (ground + height offset)
+---@return boolean visible Whether the marker was rendered
 local function DrawWaypointMarker3D(worldX, worldY, groundZ, markerZ)
-    if not duiTexture then return end
+    if not duiTexture then return false end
 
     local camCoords = GetGameplayCamCoord()
     local dx, dy, dz = worldX - camCoords.x, worldY - camCoords.y, markerZ - camCoords.z
     local camDistSq = dx * dx + dy * dy + dz * dz
 
     -- Early exit if too far (compare squared distances to avoid sqrt)
-    if camDistSq > MAX_DRAW_DISTANCE_SQ then return end
+    if camDistSq > MAX_DRAW_DISTANCE_SQ then return false end
 
     -- Check if on screen before doing more work
-    if not GetScreenCoordFromWorldCoord(worldX, worldY, markerZ) then return end
+    if not GetScreenCoordFromWorldCoord(worldX, worldY, markerZ) then return false end
 
     -- Calculate distance multiplier for scaling (only compute sqrt when needed)
     local camDist = sqrt(camDistSq)
@@ -263,6 +267,8 @@ local function DrawWaypointMarker3D(worldX, worldY, groundZ, markerZ)
         arrowTipZ = groundZ + 0.5
     end
     DrawLine(worldX, worldY, groundZ, worldX, worldY, arrowTipZ, 255, 255, 255, 255)
+
+    return true
 end
 
 --- Main thread for tracking waypoint changes
@@ -316,7 +322,8 @@ local function StartDistanceThread()
         local distValue, distUnit
 
         while true do
-            if isWaypointActive and waypointCoords then
+            -- Only update when waypoint is active AND marker is visible on screen
+            if isWaypointActive and waypointCoords and isMarkerVisible then
                 playerPed = PlayerPedId()
                 playerCoords = GetEntityCoords(playerPed)
 
@@ -337,6 +344,14 @@ local function StartDistanceThread()
                     })
                 end
 
+                targetHeight = GetTargetMarkerHeight(currentDistance, playerCoords.z, targetGroundZ)
+            elseif isWaypointActive and waypointCoords then
+                -- Still calculate target height even when not visible (for smooth transitions)
+                playerPed = PlayerPedId()
+                playerCoords = GetEntityCoords(playerPed)
+                local dx = playerCoords.x - waypointCoords.x
+                local dy = playerCoords.y - waypointCoords.y
+                currentDistance = sqrt(dx * dx + dy * dy)
                 targetHeight = GetTargetMarkerHeight(currentDistance, playerCoords.z, targetGroundZ)
             end
 
@@ -383,11 +398,12 @@ local function StartRenderThread()
                     smoothedHeight = maxHeightClamped
                 end
 
-                -- Draw marker and line
-                DrawWaypointMarker3D(waypointCoords.x, waypointCoords.y, smoothedGroundZ, smoothedGroundZ + smoothedHeight)
+                -- Draw marker and line, update visibility flag
+                isMarkerVisible = DrawWaypointMarker3D(waypointCoords.x, waypointCoords.y, smoothedGroundZ, smoothedGroundZ + smoothedHeight)
 
                 Wait(0)
             else
+                isMarkerVisible = false
                 Wait(500)
             end
         end
@@ -400,7 +416,8 @@ local function Initialize()
     Wait(500)
     SendDUIMessage('config', {
         color = Config.Color,
-        label = locale('waypoint')
+        label = locale('waypoint'),
+        style = Config.Style or 'classic'
     })
     SendDUIMessage('hide')
 
