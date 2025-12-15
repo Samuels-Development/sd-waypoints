@@ -2,6 +2,14 @@
 
 > A stylish 3D waypoint marker for FiveM that displays distance to your map waypoint with smooth animations and multiple visual styles.
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c5a5c17e-ec61-4ce7-be65-207d0e3fdcd0" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0ca6b325-cac3-4924-be3f-743009af0b04" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/748b5c7f-3317-4780-9b50-256ab81dad88" />
+
+
+
 ![GitHub release](https://img.shields.io/github/v/release/Samuels-Development/sd-waypoints?label=Release&logo=github)
 [![Discord](https://img.shields.io/discord/842045164951437383?label=Discord&logo=discord&logoColor=white)](https://discord.gg/FzPehMQaBQ)
 
@@ -22,10 +30,11 @@
 
 ## ⚠️ Performance Note
 
-While efforts have been made to optimize this resource, it does run at a higher baseline than typical scripts due to the DUI (Dynamic UI) rendering required for the marker display.
+While efforts have been made to optimize this resource, it does run at a higher baseline than typical scripts due to the DUI (Dynamic UI) rendering required for the marker display. 
 
 **Expected Performance:**
 - ~0.00ms when no waypoint is set
+- ~0.01-0.02ms when waypoint is set but you're not actively looking at it
 - ~0.05-0.07ms when waypoint is active and driving toward it
 
 The render thread must run every frame to display the sprite, and the DUI browser engine adds inherent overhead. This is a trade-off for the visual flexibility that DUI provides.
