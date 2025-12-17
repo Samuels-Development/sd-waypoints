@@ -43,7 +43,7 @@ The render thread must run every frame to display the sprite, and the DUI browse
 
 ## 📦 Installation
 
-1. [Download the latest release](https://github.com/Samuels-Development/sd-waypoints/releases/latest)
+1. [Download the latest release](https://github.com/Samuels-Development/sd-waypoints/releases/latest) (ZIP, NOT SOURCE)
 2. Ensure `ox_lib` is started before `sd-waypoints`
 3. Add `sd-waypoints` to your resources folder
 4. Add `ensure sd-waypoints` to your server.cfg
