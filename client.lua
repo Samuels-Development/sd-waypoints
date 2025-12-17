@@ -2,6 +2,13 @@ local Config = require 'config'
 
 lib.locale(Config.Locale)
 
+if not LoadResourceFile(GetCurrentResourceName(), 'web/build/index.html') then
+    print('^1[SD-DIALOG] ERROR: web/build folder not found!^0')
+    print('^1[SD-DIALOG] You likely downloaded the source code instead of the release.^0')
+    print('^1[SD-DIALOG] Please download the latest release from: https://github.com/Samuels-Development/sd-dialog/releases/latest^0')
+    return
+end
+
 local DUI_WIDTH = 512
 local DUI_HEIGHT = 320
 local UPDATE_INTERVAL = 100
