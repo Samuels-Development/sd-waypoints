@@ -13,6 +13,8 @@
 ![GitHub release](https://img.shields.io/github/v/release/Samuels-Development/sd-waypoints?label=Release&logo=github)
 [![Discord](https://img.shields.io/discord/842045164951437383?label=Discord&logo=discord&logoColor=white)](https://discord.gg/FzPehMQaBQ)
 
+If you have any issues or suggestions, feel free to PR, create an issue or join my discord: https://discord.gg/FzPehMQaBQ
+
 ## 📋 Dependencies
 
 - [ox_lib](https://github.com/overextended/ox_lib)
